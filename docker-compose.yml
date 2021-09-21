@@ -21,9 +21,9 @@ services:
       - wproot:/var/www/html
     restart: always
     environment:
-      WORDPRESS_TITLE: END-site
-      ADMIN_EMAIL: larrywtf609@gmail.com
-      ADMIN_USER: larry
+      WORDPRESS_TITLE: '${WORDPRESS_TITLE}'
+      ADMIN_EMAIL: '${ADMIN_EMAIL}'
+      ADMIN_USER: '${ADMIN_USER}'
       WORDPRESS_DB_HOST: mysql
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: '${DB_PASSWORD}'
