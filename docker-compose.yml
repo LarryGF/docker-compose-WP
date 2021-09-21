@@ -1,0 +1,111 @@
+version: '3.1'
+
+services:
+
+  nginx:
+    restart: always
+    image: emcniece/nginx-cache-purge-wp
+    ports:
+      - 8080:80
+    links:
+      - wp-fpm
+    volumes:
+      - wproot:/var/www/html
+    networks:
+      - wp
+  
+
+  wp-fpm:
+    build: wp
+    volumes:
+      - wproot:/var/www/html
+    restart: always
+    environment:
+      WORDPRESS_TITLE: END-site
+      ADMIN_EMAIL: larrywtf609@gmail.com
+      ADMIN_USER: larry
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: '${DB_PASSWORD}'
+      WPFPM_WP_REDIS_HOST: redis
+      WP_PLUGINS: "nginx-helper redis-cache"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - wp
+      - webgateway
+    
+  mysql:
+    image: mariadb
+    command: mysqld --innodb-buffer-pool-size=20M
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_USER: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    networks:
+      - wp
+
+  redis:
+    image: redis:3-alpine
+    restart: always
+    networks:
+      - wp
+
+  prometheus:
+     build: prometheus
+     container_name: prometheus
+     volumes:
+      - prom_data:/prometheus/
+     command: "--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
+     ports:
+      - 9090:9090
+     networks:
+      - webgateway
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+    - 3000:3000
+    volumes:
+    - graf_data:/var/lib/grafana
+    - graf:/etc/grafana/provisioning/
+    networks:
+    - webgateway
+
+
+networks:
+  wp:
+  webgateway:
+    driver: bridge
+
+volumes:
+  wproot:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      type: none
+      device: /srv/wordpress/wp_root
+  graf:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      type: none
+      device: /srv/wordpress/grafana
+  graf_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /srv/wordpress/grafana_data
+  prom_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /srv/wordpress/prometheus_data
