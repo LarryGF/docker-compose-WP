@@ -21,12 +21,12 @@ services:
       - wproot:/var/www/html
     restart: always
     environment:
-      WORDPRESS_TITLE: '${WORDPRESS_TITLE}'
-      ADMIN_EMAIL: '${ADMIN_EMAIL}'
-      ADMIN_USER: '${ADMIN_USER}'
+      WORDPRESS_TITLE: '${WORDPRESS_TITLE:-END_site}'
+      ADMIN_EMAIL: '${ADMIN_EMAIL:-larrywtf609@gmail.com}'
+      ADMIN_USER: '${ADMIN_USER:-larry}'
       WORDPRESS_DB_HOST: mysql
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: '${DB_PASSWORD}'
+      WORDPRESS_DB_PASSWORD: '${DB_PASSWORD:-12345678}'
       WPFPM_WP_REDIS_HOST: redis
       WP_PLUGINS: "nginx-helper redis-cache"
     depends_on:
@@ -44,7 +44,7 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_USER: wordpress
       MYSQL_DATABASE: wordpress
-      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_PASSWORD: '${DB_PASSWORD:-12345678}'
     networks:
       - wp
 
@@ -84,28 +84,6 @@ networks:
 
 volumes:
   wproot:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      type: none
-      device: /srv/wordpress/wp_root
   graf:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      type: none
-      device: /srv/wordpress/grafana
   graf_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /srv/wordpress/grafana_data
   prom_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /srv/wordpress/prometheus_data
